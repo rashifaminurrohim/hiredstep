@@ -6,8 +6,8 @@ class Application {
     required this.company,
     required this.position,
     required this.status,
-    required this.appliedAt,
-    required this.notes,
+    this.appliedAt,
+    this.notes,
   });
 
   final String id;
