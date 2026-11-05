@@ -1,3 +1,4 @@
+import 'package:hiredstep/domain/models/history_entry.dart';
 import 'package:hiredstep/domain/models/status.dart';
 
 class Application {
@@ -8,6 +9,7 @@ class Application {
     required this.status,
     this.appliedAt,
     this.notes,
+    this.history = const [],
   });
 
   final String id;
@@ -16,4 +18,5 @@ class Application {
   final Status status;
   final DateTime? appliedAt;
   final String? notes;
+  final List<HistoryEntry> history;
 }
