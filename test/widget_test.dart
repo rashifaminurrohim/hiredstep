@@ -19,4 +19,34 @@ void main() {
     );
     expect(find.text('No applications yet.'), findsOneWidget);
   });
+
+  testWidgets('adds an application through the form', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: ApplicationListScreen(applications: [])),
+    );
+
+    await tester.tap(find.text('Add application'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Save'));
+    await tester.tap(find.text('Save'));
+    await tester.pump();
+    expect(find.text('Company is required'), findsOneWidget);
+    expect(find.text('Position is required'), findsOneWidget);
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Company *'),
+      'Company X',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Position *'),
+      'Flutter Intern',
+    );
+    await tester.ensureVisible(find.text('Save'));
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Company X'), findsOneWidget);
+    expect(find.text('Applied'), findsOneWidget);
+  });
 }

@@ -11,6 +11,7 @@ import '../../utils/date_format.dart';
 class ApplicationFormScreen extends StatefulWidget {
   const ApplicationFormScreen({super.key});
 
+  @override
   State<ApplicationFormScreen> createState() => _ApplicationFormScreenState();
 }
 
@@ -23,6 +24,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
   Stage _stage = Stage.applied;
   DateTime _date = DateTime.now();
 
+  @override
   void dispose() {
     _companyController.dispose();
     _positionController.dispose();
