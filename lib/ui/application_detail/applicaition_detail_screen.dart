@@ -31,7 +31,7 @@ class ApplicationDetailScreen extends StatelessWidget {
           Text('History', style: textTheme.titleMedium),
           const SizedBox(height: 12),
           Card(
-            margin: EdgeInsets.all(16),
+            margin: const EdgeInsets.all(16),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: HistoryTimeline(entries: application.history),

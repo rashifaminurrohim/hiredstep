@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hiredstep/ui/application_detail/applicaition_detail_screen.dart';
 import 'package:hiredstep/ui/application_list/widgets/application_card.dart';
 import 'package:hiredstep/ui/core/widgets/empty_state.dart';
 
@@ -28,11 +29,19 @@ class _ApplicationListScreenState extends State<ApplicationListScreen> {
     setState(() => _applications.insert(0, created));
   }
 
+  void _openDetail(Application application) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ApplicationDetailScreen(application: application),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('My Applications')),
-      body: widget.applications.isEmpty
+      body: _applications.isEmpty
           ? EmptyState(
               message: 'No applications yet.',
               actionLabel: 'Add application',
@@ -43,7 +52,11 @@ class _ApplicationListScreenState extends State<ApplicationListScreen> {
               itemCount: _applications.length,
               separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                return ApplicationCard(application: _applications[index]);
+                final application = _applications[index];
+                return ApplicationCard(
+                  application: application,
+                  onTap: () => _openDetail(application),
+                );
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
