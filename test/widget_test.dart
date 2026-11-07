@@ -7,6 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hiredstep/data/repositories/dummy_applications.dart';
 
 import 'package:hiredstep/ui/application_list/application_list_screen.dart';
 
@@ -48,5 +49,22 @@ void main() {
 
     expect(find.text('Company X'), findsOneWidget);
     expect(find.text('Applied'), findsOneWidget);
+  });
+
+  testWidgets('opens the detail screen with history', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(home: ApplicationListScreen(applications: dummyApplications)),
+    );
+
+    await tester.tap(find.text('Company A'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('History'), findsOneWidget);
+    expect(find.text('Interview'), findsOneWidget);
+    expect(find.text('Technical Test'), findsNWidgets(2));
+    expect(
+      find.text('Online technical test. Prepare Flutter and Dart basics.'),
+      findsOneWidget,
+    );
   });
 }
