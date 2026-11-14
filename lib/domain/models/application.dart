@@ -19,4 +19,14 @@ class Application {
   final DateTime? appliedAt;
   final String? notes;
   final List<HistoryEntry> history;
+
+  // When the application last changed, or null if it has no history
+  DateTime? get lastActivityAt {
+    if (history.isEmpty) {
+      return null;
+    }
+    return history
+        .map((entry) => entry.createdAt)
+        .reduce((a, b) => a.isAfter(b) ? a : b);
+  }
 }
