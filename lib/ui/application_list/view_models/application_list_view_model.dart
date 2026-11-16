@@ -4,8 +4,7 @@ import 'package:hiredstep/data/repositories/application_repository.dart';
 import '../../../domain/models/application.dart';
 
 class ApplicationListViewModel extends ChangeNotifier {
-  ApplicationListViewModel({required ApplicationRepository repository})
-    : _repository = repository;
+  ApplicationListViewModel({required this._repository});
 
   final ApplicationRepository _repository;
 

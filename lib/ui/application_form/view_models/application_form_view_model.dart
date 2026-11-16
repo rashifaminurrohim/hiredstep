@@ -8,8 +8,7 @@ import '../../../domain/models/history_entry.dart';
 import '../../../domain/models/stage.dart';
 
 class ApplicationFormViewModel extends ChangeNotifier {
-  ApplicationFormViewModel({required ApplicationRepository repository})
-    : _repository = repository;
+  ApplicationFormViewModel({required this._repository});
 
   final ApplicationRepository _repository;
 

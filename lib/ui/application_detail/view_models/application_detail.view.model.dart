@@ -5,10 +5,9 @@ import '../../../domain/models/application.dart';
 
 class ApplicationDetailViewModel extends ChangeNotifier {
   ApplicationDetailViewModel({
-    required ApplicationRepository repository,
-    required String applicationId,
-  }) : _repository = repository,
-       _applicationId = applicationId;
+    required this._repository,
+    required this._applicationId,
+  });
 
   final ApplicationRepository _repository;
   final String _applicationId;

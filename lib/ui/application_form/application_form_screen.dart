@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hiredstep/domain/models/history_entry.dart';
-import 'package:hiredstep/utils/id_generator.dart';
+import 'package:hiredstep/ui/application_form/view_models/application_form_view_model.dart';
+import 'package:provider/provider.dart';
 
-import '../../config/default_statuses.dart';
-import '../../domain/models/application.dart';
 import '../../domain/models/stage.dart';
-import '../../domain/models/status.dart';
 import '../../utils/date_format.dart';
 
 class ApplicationFormScreen extends StatefulWidget {
@@ -21,9 +18,6 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
   final _positionController = TextEditingController();
   final _notesController = TextEditingController();
 
-  Stage _stage = Stage.applied;
-  DateTime _date = DateTime.now();
-
   @override
   void dispose() {
     _companyController.dispose();
@@ -32,56 +26,41 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
     super.dispose();
   }
 
-  String? _validateRequired(String? value, String message) {
-    if (value == null || value.trim().isEmpty) {
-      return message;
-    }
-    return null;
-  }
-
-  Status _statusFor(Stage stage) {
-    return defaultStatuses.firstWhere((status) => status.stage == stage);
-  }
-
   Future<void> _pickDate() async {
+    final viewModel = context.read<ApplicationFormViewModel>();
     final picked = await showDatePicker(
       context: context,
-      initialDate: _date,
+      initialDate: viewModel.date,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
     if (picked != null && mounted) {
-      setState(() => _date = picked);
+      viewModel.selectDate(picked);
     }
   }
 
-  void _save() {
+  void _save() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    final status = _statusFor(_stage);
-    final notes = _notesController.text;
-    final application = Application(
-      id: generateId(),
+
+    await context.read<ApplicationFormViewModel>().save(
       company: _companyController.text,
       position: _positionController.text,
-      status: status,
-      appliedAt: _stage == Stage.applied ? _date : null,
-      notes: notes.isEmpty ? null : notes,
-      history: [
-        HistoryEntry(
-          id: generateId(),
-          status: status,
-          date: _date,
-          createdAt: DateTime.now(),
-        ),
-      ],
+      notes: _notesController.text,
     );
-    Navigator.of(context).pop(application);
+
+    if (!mounted) {
+      return;
+    }
+
+    Navigator.of(context).pop(true);
   }
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<ApplicationFormViewModel>();
+
     return Scaffold(
       appBar: AppBar(title: const Text('Add application')),
       body: Form(
@@ -97,7 +76,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                 border: OutlineInputBorder(),
               ),
               validator: (value) =>
-                  _validateRequired(value, 'Company is required'),
+                  viewModel.validateRequired(value, 'Company is required'),
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -108,7 +87,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                 border: OutlineInputBorder(),
               ),
               validator: (value) =>
-                  _validateRequired(value, 'Position is required'),
+                  viewModel.validateRequired(value, 'Position is required'),
             ),
             const SizedBox(height: 16),
             Text('Stage', style: Theme.of(context).textTheme.labelLarge),
@@ -118,16 +97,16 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                 ButtonSegment(value: Stage.saved, label: Text('Saved')),
                 ButtonSegment(value: Stage.applied, label: Text('Applied')),
               ],
-              selected: {_stage},
+              selected: {viewModel.stage},
               onSelectionChanged: (selection) {
-                setState(() => _stage = selection.first);
+                viewModel.selectStage(selection.first);
               },
             ),
-            if (_stage == Stage.applied) ...[
+            if (viewModel.showsDate) ...[
               const SizedBox(height: 16),
               TextFormField(
-                key: ValueKey(_date),
-                initialValue: formatDate(_date),
+                key: ValueKey(viewModel.date),
+                initialValue: formatDate(viewModel.date),
                 readOnly: true,
                 onTap: _pickDate,
                 decoration: const InputDecoration(
@@ -146,9 +125,9 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             FilledButton(
-              onPressed: _save,
+              onPressed: viewModel.isSaving ? null : _save,
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(52),
               ),

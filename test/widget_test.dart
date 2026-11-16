@@ -7,24 +7,52 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hiredstep/data/repositories/application_repository.dart';
 import 'package:hiredstep/data/repositories/dummy_applications.dart';
+import 'package:hiredstep/data/repositories/in_memory_application_repository.dart';
+import 'package:hiredstep/domain/models/application.dart';
 
 import 'package:hiredstep/ui/application_list/application_list_screen.dart';
+import 'package:hiredstep/ui/application_list/view_models/application_list_view_model.dart';
+import 'package:provider/provider.dart';
+
+Widget _buildApp({List<Application> seed = const []}) {
+  return MultiProvider(
+    providers: [
+      Provider<ApplicationRepository>(
+        create: (_) => InMemoryApplicationRepository(seed: seed),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => ApplicationListViewModel(
+          repository: context.read<ApplicationRepository>(),
+        )..load(),
+      ),
+    ],
+    child: const MaterialApp(home: ApplicationListScreen()),
+  );
+}
 
 void main() {
+  testWidgets('shows applications in the list', (tester) async {
+    await tester.pumpWidget(_buildApp(seed: dummyApplications));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Company A'), findsOneWidget);
+    expect(find.text('Technical Test'), findsOneWidget);
+  });
+
   testWidgets('shows empty state when there are no application', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      const MaterialApp(home: ApplicationListScreen(applications: [])),
-    );
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+
     expect(find.text('No applications yet.'), findsOneWidget);
   });
 
   testWidgets('adds an application through the form', (tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(home: ApplicationListScreen(applications: [])),
-    );
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Add application'));
     await tester.pumpAndSettle();
@@ -52,9 +80,8 @@ void main() {
   });
 
   testWidgets('opens the detail screen with history', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(home: ApplicationListScreen(applications: dummyApplications)),
-    );
+    await tester.pumpWidget(_buildApp(seed: dummyApplications));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Company A'));
     await tester.pumpAndSettle();
